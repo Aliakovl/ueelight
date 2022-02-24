@@ -77,7 +77,7 @@ class Form(QDialog):
         super(Form, self).__init__(parent)
         self.setMinimumSize(400, 100)
         icon = QIcon()
-        icon.addFile("/home/aleksei/.yeelight.svg")
+        icon.addFile("yeelight-logo.svg")
         self.setWindowIcon(icon)
         self.setMaximumSize(400, 100)
         self.setWindowTitle("Yeelight")
@@ -91,10 +91,10 @@ class Form(QDialog):
                 border-radius: 10px;
                 height: 28px;
                 margin: 0px;
-                background-color: rgb(60,60,60);
+                background-color: rgb(40,40,40);
             }
             QSlider::groove:horizontal:hover {
-                background-color: rgb(40,40,40);
+                background-color: rgb(50,50,50);
             }
             QSlider::handle:horizontal {
                 background-color: rgb(120, 80, 190);
