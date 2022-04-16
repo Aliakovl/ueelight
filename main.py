@@ -1,9 +1,12 @@
 import sys
+import os
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from yeelight import Bulb
 from yeelight import discover_bulbs
+
+pwd = os.path.abspath(os.path.join(os.getenv("VIRTUAL_ENV"), os.pardir))
 
 
 class PyToggle(QCheckBox):
@@ -16,7 +19,7 @@ class PyToggle(QCheckBox):
             active_color="#7850BE",
             animation_curve=QEasingCurve.OutCirc,
             init_state=False,
-            setValue=None,
+            set_value=None,
     ):
         QCheckBox.__init__(self)
         self.setFixedSize(width, 28)
@@ -25,7 +28,7 @@ class PyToggle(QCheckBox):
         self._bg_color = bg_color
         self._circle_color = circle_color
         self._active_color = active_color
-        self.setValue = setValue
+        self.setValue = set_value
         self._circle_position = self.width() - 26 if init_state else 3
         self.animation = QPropertyAnimation(self, b"circle_position", self)
         self.animation.setEasingCurve(animation_curve)
@@ -60,16 +63,12 @@ class PyToggle(QCheckBox):
         p.setPen(Qt.NoPen)
         if not self.isChecked():
             p.setBrush(QColor(self._bg_color))
-            p.drawRoundedRect(0, 0, self.width(), self.height(), self.width() / 6, self.width() / 6)
-            p.setBrush(QColor(self._circle_color))
-            p.drawEllipse(self._circle_position, 3, 22, 22)
-            p.end()
         else:
             p.setBrush(QColor(self._active_color))
-            p.drawRoundedRect(0, 0, self.width(), self.height(), self.width() / 6, self.width() / 6)
-            p.setBrush(QColor(self._circle_color))
-            p.drawEllipse(self._circle_position, 3, 22, 22)
-            p.end()
+        p.drawRoundedRect(0, 0, self.width(), self.height(), self.width() / 6, self.width() / 6)
+        p.setBrush(QColor(self._circle_color))
+        p.drawEllipse(self._circle_position, 3, 22, 22)
+        p.end()
 
 
 class Form(QDialog):
@@ -77,7 +76,7 @@ class Form(QDialog):
         super(Form, self).__init__(parent)
         self.setMinimumSize(400, 100)
         icon = QIcon()
-        icon.addFile("yeelight-logo.svg")
+        icon.addFile(os.path.join(pwd, "yeelight-logo.svg"))
         self.setWindowIcon(icon)
         self.setMaximumSize(400, 100)
         self.setWindowTitle("Yeelight")
@@ -111,14 +110,14 @@ class Form(QDialog):
         self.bulb = Bulb(self.get_ip(), effect="sudden", duration=10000)
         bright, power = self.initValue()
         if not bright and not power:
-            self.button = PyToggle(init_state=False, setValue=1, bulb=self.bulb)
+            self.button = PyToggle(init_state=False, set_value=1, bulb=self.bulb)
             self.button.setDisabled(True)
             self.slider.setDisabled(True)
             layout.addWidget(self.slider, Qt.AlignTop, Qt.AlignLeft)
             layout.addWidget(self.button, Qt.AlignTop, Qt.AlignRight)
             return
 
-        self.button = PyToggle(init_state=power, setValue=self.setValue, bulb=self.bulb)
+        self.button = PyToggle(init_state=power, set_value=self.setValue, bulb=self.bulb)
 
         self.button.setCheckState(Qt.CheckState.Checked if power else Qt.CheckState.Unchecked)
         self.slider.setValue(bright)
@@ -142,7 +141,7 @@ class Form(QDialog):
             return 0, 0
 
     def get_ip(self):
-        with open("ip", 'r+') as ip_file:
+        with open(os.path.join(pwd, "ip"), 'r+') as ip_file:
             ip = ip_file.read()
             bulb = Bulb(ip)
             if bulb.get_capabilities() is None:
